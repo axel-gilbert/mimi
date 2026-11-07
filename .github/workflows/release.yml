@@ -1,0 +1,58 @@
+name: Release
+
+# Pushing a tag like v1.2.3 builds, tests and publishes the GitHub release by itself.
+# The version comes from the tag only, so the exe, the tag and the release always match.
+# Release notes: docs/releases/v1.2.3.md if it exists.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Version from the tag
+        id: v
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart('v')
+          if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "The tag must look like v1.2.3 (got ${{ github.ref_name }})" }
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Test
+        run: dotnet test tests/Mimi.Tests/Mimi.Tests.csproj -c Release
+
+      - name: Build
+        env:
+          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+        shell: pwsh
+        run: dotnet build Mimi.csproj -c Release -p:Version=${{ steps.v.outputs.version }} "-p:GiphyApiKey=$env:GIPHY_API_KEY"
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $v = "${{ steps.v.outputs.version }}"
+          $exe = "Mimi-$v-win-x64.exe"
+          Copy-Item bin/Release/net48/Mimi.exe $exe
+          $built = (Get-Item $exe).VersionInfo.FileVersion
+          if (-not $built.StartsWith($v)) { throw "Built version $built doesn't match the tag $v" }
+          $sha = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
+          $notes = "docs/releases/v$v.md"
+          $body = if (Test-Path $notes) { Get-Content $notes -Raw } else { "Mimi $v" }
+          $body += "`n`nSHA-256: ``$sha``"
+          Set-Content release-notes.md $body -Encoding utf8
+          "EXE=$exe" >> $env:GITHUB_ENV
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" "${{ env.EXE }}" --title "Mimi ${{ steps.v.outputs.version }}" --notes-file release-notes.md --verify-tag

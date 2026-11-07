@@ -7,11 +7,11 @@ using System.Windows.Media;
 namespace Mimi
 {
     /// <summary>
-    /// Petits sons mignons synthétisés en code (aucun fichier audio à embarquer) :
-    ///  - "bloop" montant sur une gamme pentatonique (le spam fait une petite mélodie),
-    ///  - carillon "mi-mi" quand une vague de cœurs arrive,
-    ///  - arpège magique pour le méga-cœur.
-    /// Plusieurs lecteurs par son pour pouvoir les superposer.
+    /// Cute little sounds synthesized in code (no audio files to embed):
+    ///  - rising "bloop" on a pentatonic scale (spamming plays a little melody),
+    ///  - "mi-mi" chime when a wave of hearts arrives,
+    ///  - magical arpeggio for the mega heart.
+    /// Several players per sound so they can overlap.
     /// </summary>
     sealed class SoundBank
     {
@@ -31,17 +31,17 @@ namespace Mimi
         {
             try
             {
-                var dir = Path.Combine(Path.GetTempPath(), "Mimi-sons-" + Program.Profile);
+                var dir = Path.Combine(Path.GetTempPath(), "Mimi-sounds-" + Program.Profile);
                 Directory.CreateDirectory(dir);
                 var clips = new List<short[]>();
                 foreach (var f in Penta) clips.Add(Bloop(f, 0.55, 0.085));
-                clips.Add(Bloop(1174.7, 0.30, 0.05)); // SEND : petit "tic" doux
+                clips.Add(Bloop(1174.7, 0.30, 0.05)); // SEND: soft little "tick"
                 clips.Add(ChimeClip());
                 clips.Add(MegaArp());
                 for (int i = 0; i < clips.Count; i++)
                 {
                     var path = Path.Combine(dir, "s" + i + ".wav");
-                    try { File.WriteAllBytes(path, Wav(clips[i])); } catch { /* déjà présent / verrouillé */ }
+                    try { File.WriteAllBytes(path, Wav(clips[i])); } catch { /* already present / locked */ }
                     var arr = new MediaPlayer[i < Penta.Length ? 2 : 3];
                     for (int j = 0; j < arr.Length; j++)
                     {
@@ -82,9 +82,9 @@ namespace Mimi
         public void Chime() => Play(CHIME);
         public void Mega() => Play(MEGA);
 
-        // ───────────── synthèse ─────────────
+        // ───────────── synthesis ─────────────
 
-        /// <summary>"Bloop" : sinus dont la hauteur monte vite + petite étincelle aiguë.</summary>
+        /// <summary>"Bloop": sine wave with a fast rising pitch + a small high-pitched sparkle.</summary>
         static short[] Bloop(double f0, double amp, double tau)
         {
             int n = (int)(Rate * 0.34);
@@ -118,12 +118,12 @@ namespace Mimi
             }
         }
 
-        /// <summary>Carillon à deux notes : "mi-mi".</summary>
+        /// <summary>Two-note chime: "mi-mi".</summary>
         static short[] ChimeClip()
         {
             var buf = new double[(int)(Rate * 1.0)];
-            Bell(buf, 0.00, 1318.5, 0.30, 0.30); // Mi6
-            Bell(buf, 0.12, 1760.0, 0.26, 0.38); // La6
+            Bell(buf, 0.00, 1318.5, 0.30, 0.30); // E6
+            Bell(buf, 0.12, 1760.0, 0.26, 0.38); // A6
             return ToPcm(buf);
         }
 
@@ -143,7 +143,7 @@ namespace Mimi
             {
                 double v = buf[i];
                 if (i > buf.Length - fade) v *= (double)(buf.Length - i) / fade;
-                v = Math.Tanh(v * 1.2); // limiteur doux
+                v = Math.Tanh(v * 1.2); // soft limiter
                 o[i] = (short)(v * 30000);
             }
             return o;

@@ -4,12 +4,12 @@ using System.Drawing;
 namespace Mimi
 {
     /// <summary>
-    /// Mini moteur de rendu logiciel : dessine un sprite (rotation, échelle, squash &amp; stretch, opacité)
-    /// directement dans la mémoire de la surface, en virgule fixe.
-    /// Beaucoup plus léger que GDI+ (pas de transformations ni d'ImageAttributes).
+    /// Tiny software renderer: draws a sprite (rotation, scale, squash &amp; stretch, opacity)
+    /// straight into the surface memory, using fixed-point math.
+    /// Much lighter than GDI+ (no transforms or ImageAttributes).
     ///
-    /// Gère aussi une grille de tuiles "sales" : on n'efface et n'envoie à l'écran que
-    /// les zones où quelque chose a été dessiné, pas tout l'écran.
+    /// Also tracks a grid of "dirty" tiles: only the areas where something was drawn
+    /// are cleared and pushed to the screen, not the whole screen.
     /// </summary>
     unsafe sealed class Blitter
     {
@@ -28,17 +28,17 @@ namespace Mimi
             cur = new bool[tw * th];
         }
 
-        /// <summary>Efface ce qui a été dessiné à l'image précédente. Renvoie la zone à envoyer à l'écran.</summary>
+        /// <summary>Clears what was drawn in the previous frame. Returns the area to push to the screen.</summary>
         public Rectangle BeginFrame()
         {
-            // les tuiles dessinées à l'image précédente doivent être effacées puis renvoyées
+            // tiles drawn in the previous frame must be cleared and then pushed again
             var t = prev; prev = cur; cur = t;
             Array.Clear(cur, 0, cur.Length);
             for (int ty = 0; ty < th; ty++)
                 for (int tx = 0; tx < tw; tx++)
                 {
                     if (!prev[ty * tw + tx]) continue;
-                    // fusionne les tuiles consécutives d'une même ligne
+                    // merge consecutive tiles on the same row
                     int tx2 = tx;
                     while (tx2 + 1 < tw && prev[ty * tw + tx2 + 1]) tx2++;
                     int x0 = tx * Tile, x1 = Math.Min(w, (tx2 + 1) * Tile);
@@ -56,7 +56,7 @@ namespace Mimi
             return Rectangle.Empty;
         }
 
-        /// <summary>Zone englobant ce qui a été effacé et ce qui vient d'être dessiné.</summary>
+        /// <summary>Area covering what was cleared and what was just drawn.</summary>
         public Rectangle DirtyBounds()
         {
             int minX = int.MaxValue, minY = int.MaxValue, maxX = -1, maxY = -1;
@@ -86,8 +86,8 @@ namespace Mimi
         }
 
         /// <summary>
-        /// Dessine le sprite centré en (cx, cy). Transformations appliquées au sprite dans l'ordre :
-        /// échelle → rotation (rot) → étirement (sx, sy) selon l'axe stretchDeg.
+        /// Draws the sprite centered at (cx, cy). Transforms are applied to the sprite in this order:
+        /// scale → rotation (rot) → stretch (sx, sy) along the stretchDeg axis.
         /// </summary>
         public void Draw(Art.Sprite s, float cx, float cy, float scale, float rotDeg, float sx, float sy, float stretchDeg, float alpha)
         {
@@ -107,7 +107,7 @@ namespace Mimi
             }
 
             double hw = s.W / 2.0, hh = s.H / 2.0;
-            // boîte englobante à l'écran
+            // on-screen bounding box
             double ex = Math.Abs(m00) * hw + Math.Abs(m01) * hh;
             double ey = Math.Abs(m10) * hw + Math.Abs(m11) * hh;
             int x0 = Math.Max(0, (int)Math.Floor(cx - ex)), x1 = Math.Min(w, (int)Math.Ceiling(cx + ex));

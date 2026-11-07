@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace Mimi
 {
-    /// <summary>Raccourci clavier global (fonctionne même quand Mimi n'a pas le focus).</summary>
+    /// <summary>Global keyboard shortcut (works even when Mimi doesn't have focus).</summary>
     sealed class GlobalHotkey : NativeWindow, IDisposable
     {
         public const int MOD_ALT = 1, MOD_CONTROL = 2, MOD_SHIFT = 4, MOD_WIN = 8;
@@ -15,7 +15,7 @@ namespace Mimi
 
         public GlobalHotkey()
         {
-            // fenêtre "message-only", invisible
+            // invisible "message-only" window
             CreateHandle(new CreateParams { Parent = new IntPtr(-3) });
         }
 

@@ -1,0 +1,29 @@
+name: CI
+
+# Builds and tests every push to main and every pull request.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Test
+        run: dotnet test tests/Mimi.Tests/Mimi.Tests.csproj -c Release
+
+      - name: Build
+        run: dotnet build Mimi.csproj -c Release
+
+      - name: Upload the exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mimi-${{ github.sha }}
+          path: bin/Release/net48/Mimi.exe

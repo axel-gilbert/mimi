@@ -14,14 +14,14 @@ using System.Windows.Forms;
 namespace Mimi
 {
     /// <summary>
-    /// Mises à jour automatiques via les Releases GitHub.
+    /// Automatic updates via GitHub Releases.
     ///
-    /// 1. On lit la liste des releases publiques du dépôt.
-    /// 2. On prend la plus haute version qui a un fichier "*-win-x64.exe".
-    /// 3. Si elle est plus récente : téléchargement dans %TEMP%, vérification
-    ///    (taille, empreinte SHA-256 fournie par GitHub, en-tête d'exécutable).
-    /// 4. Un exe Windows en cours d'exécution ne peut pas être écrasé, mais il peut être renommé :
-    ///    Mimi.exe → Mimi.exe.old, le nouveau prend sa place, on relance, l'ancien est supprimé au démarrage suivant.
+    /// 1. Read the list of public releases of the repository.
+    /// 2. Pick the highest version that has a "*-win-x64.exe" file.
+    /// 3. If it is newer: download to %TEMP%, then verify
+    ///    (size, SHA-256 digest provided by GitHub, executable header).
+    /// 4. A running Windows exe cannot be overwritten, but it can be renamed:
+    ///    Mimi.exe → Mimi.exe.old, the new one takes its place, we restart, and the old one is deleted on the next startup.
     /// </summary>
     static class Updater
     {
@@ -81,7 +81,7 @@ namespace Mimi
             return req;
         }
 
-        static Version ParseTag(string tag)
+        internal static Version ParseTag(string tag)
         {
             if (string.IsNullOrEmpty(tag)) return null;
             string t = tag.TrimStart('v', 'V');
@@ -91,7 +91,7 @@ namespace Mimi
             return new Version(v.Major, v.Minor, Math.Max(0, v.Build));
         }
 
-        /// <summary>Renvoie la mise à jour disponible, ou null si on est à jour. Appel bloquant (thread de fond).</summary>
+        /// <summary>Returns the available update, or null if up to date. Blocking call (background thread).</summary>
         public static UpdateInfo Check()
         {
             GhRelease[] releases;
@@ -120,12 +120,12 @@ namespace Mimi
             return best != null && best.Version > Current ? best : null;
         }
 
-        /// <summary>Télécharge et vérifie la mise à jour. Renvoie le chemin du fichier téléchargé.</summary>
+        /// <summary>Downloads and verifies the update. Returns the path of the downloaded file.</summary>
         public static string Download(UpdateInfo u)
         {
             if (!u.Url.StartsWith("https://github.com/", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException("Adresse de téléchargement inattendue");
-            var dir = Path.Combine(Path.GetTempPath(), "Mimi-maj");
+                throw new InvalidOperationException("Unexpected download URL");
+            var dir = Path.Combine(Path.GetTempPath(), "Mimi-update");
             Directory.CreateDirectory(dir);
             var path = Path.Combine(dir, "Mimi-" + u.Version.ToString(3) + ".exe");
             var tmp = path + ".part";
@@ -138,14 +138,14 @@ namespace Mimi
                 s.CopyTo(f);
 
             var bytes = File.ReadAllBytes(tmp);
-            if (u.Size > 0 && bytes.Length != u.Size) throw new InvalidDataException("Taille incorrecte");
-            if (bytes.Length < 1024 || bytes[0] != 'M' || bytes[1] != 'Z') throw new InvalidDataException("Ce n'est pas un exécutable");
+            if (u.Size > 0 && bytes.Length != u.Size) throw new InvalidDataException("Incorrect size");
+            if (bytes.Length < 1024 || bytes[0] != 'M' || bytes[1] != 'Z') throw new InvalidDataException("Not an executable");
             if (u.Sha256 != null)
             {
                 using (var sha = SHA256.Create())
                 {
                     var hex = BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-", "");
-                    if (!hex.Equals(u.Sha256, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("Empreinte SHA-256 incorrecte");
+                    if (!hex.Equals(u.Sha256, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("SHA-256 digest mismatch");
                 }
             }
             if (File.Exists(path)) File.Delete(path);
@@ -153,7 +153,7 @@ namespace Mimi
             return path;
         }
 
-        /// <summary>Remplace l'exe actuel par le nouveau et lance la nouvelle version. L'appelant doit ensuite quitter.</summary>
+        /// <summary>Replaces the current exe with the new one and starts the new version. The caller must then exit.</summary>
         public static void ApplyAndRestart(string newExe)
         {
             string cur = Application.ExecutablePath;
@@ -166,7 +166,7 @@ namespace Mimi
             }
             catch
             {
-                File.Move(old, cur); // retour arrière
+                File.Move(old, cur); // roll back
                 throw;
             }
             try { File.Delete(newExe); } catch { }
@@ -177,7 +177,7 @@ namespace Mimi
             Process.Start(new ProcessStartInfo(cur, args) { UseShellExecute = false, WorkingDirectory = Path.GetDirectoryName(cur) });
         }
 
-        /// <summary>Supprime l'ancienne version laissée par une mise à jour.</summary>
+        /// <summary>Deletes the old version left behind by an update.</summary>
         public static void CleanupOld()
         {
             string old = Application.ExecutablePath + ".old";

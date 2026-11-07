@@ -10,10 +10,10 @@ using Microsoft.Win32;
 namespace Mimi
 {
     /// <summary>
-    /// Mimi s'installe tout seul : on lance Mimi.exe, il se copie dans
-    /// %LOCALAPPDATA%\Programs\Mimi, se met au démarrage de Windows, crée un raccourci
-    /// dans le menu Démarrer et une entrée "Applications installées" pour la désinstallation.
-    /// Aucun droit administrateur requis (sauf, en option, la règle du pare-feu).
+    /// Mimi installs itself: run Mimi.exe and it copies itself to
+    /// %LOCALAPPDATA%\Programs\Mimi, adds itself to Windows startup, creates a Start menu
+    /// shortcut and an "Installed apps" entry for uninstalling.
+    /// No administrator rights required (except, optionally, for the firewall rule).
     /// </summary>
     static class Installer
     {
@@ -34,7 +34,7 @@ namespace Mimi
 
         public static bool IsInstalled => File.Exists(InstalledExe);
 
-        // ───────────── démarrage automatique ─────────────
+        // ───────────── autostart ─────────────
 
         public static bool IsAutostart()
         {
@@ -56,7 +56,7 @@ namespace Mimi
 
         // ───────────── installation ─────────────
 
-        /// <summary>Propose l'installation. Renvoie true si ce processus doit s'arrêter.</summary>
+        /// <summary>Offers to install. Returns true if this process should exit.</summary>
         public static bool OfferInstall()
         {
             string msg = IsInstalled ? L.T("install.already") : L.T("install.ask");
@@ -113,7 +113,7 @@ namespace Mimi
                 k.SetValue("EstimatedSize", (int)(new FileInfo(InstalledExe).Length / 1024), RegistryValueKind.DWord);
             }
 
-            // Règle de pare-feu (UDP entrant pour Mimi.exe). Optionnel : si refusé, Windows demandera au 1er lancement.
+            // Firewall rule (inbound UDP for Mimi.exe). Optional: if declined, Windows will ask on first launch.
             RunElevated("/c netsh advfirewall firewall delete rule name=\"" + FirewallRule + "\" >nul 2>&1 & " +
                         "netsh advfirewall firewall add rule name=\"" + FirewallRule + "\" dir=in action=allow " +
                         "program=\"" + InstalledExe + "\" protocol=UDP enable=yes profile=any");
@@ -131,7 +131,7 @@ namespace Mimi
                 });
                 p?.WaitForExit(15000);
             }
-            catch (Win32Exception) { /* l'utilisateur a refusé : pas grave */ }
+            catch (Win32Exception) { /* the user declined: no big deal */ }
         }
 
         static void CreateShortcut(string lnkPath, string target)
@@ -151,7 +151,7 @@ namespace Mimi
             catch { }
         }
 
-        /// <summary>Demande poliment à une instance déjà lancée de se fermer, puis attend.</summary>
+        /// <summary>Politely asks an already running instance to close, then waits.</summary>
         static void StopRunning(string profile)
         {
             try
@@ -168,9 +168,9 @@ namespace Mimi
             catch { }
         }
 
-        // ───────────── désinstallation ─────────────
+        // ───────────── uninstallation ─────────────
 
-        /// <summary>Renvoie true si la désinstallation a eu lieu.</summary>
+        /// <summary>Returns true if the uninstall took place.</summary>
         public static bool Uninstall(bool fromRunningApp)
         {
             if (MessageBox.Show(L.T("uninstall.ask"), "Mimi",
@@ -198,7 +198,7 @@ namespace Mimi
 
             if (Directory.Exists(InstallDir))
             {
-                // On ne peut pas se supprimer soi-même : un petit cmd s'en charge 2 s après notre fermeture.
+                // We can't delete ourselves: a small cmd takes care of it 2 s after we close.
                 Process.Start(new ProcessStartInfo("cmd.exe",
                     "/c ping 127.0.0.1 -n 3 >nul & rmdir /s /q \"" + InstallDir + "\"")
                 {

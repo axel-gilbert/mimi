@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Mimi
 {
-    /// <summary>Appels Win32 (fenêtre transparente, raccourcis globaux, timer haute précision).</summary>
+    /// <summary>Win32 calls (transparent window, global hotkeys, high-resolution timer).</summary>
     static class Native
     {
         public const int WS_EX_LAYERED = 0x80000, WS_EX_TRANSPARENT = 0x20, WS_EX_TOOLWINDOW = 0x80,
@@ -68,6 +68,9 @@ namespace Mimi
         public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint mods, uint vk);
         [DllImport("user32.dll")] public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         [DllImport("user32.dll")] public static extern short GetKeyState(int vk);
+        [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int vk);
+        [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("kernel32.dll", EntryPoint = "RtlZeroMemory")] public static extern void ZeroMemory(IntPtr dest, IntPtr size);
 
         [DllImport("winmm.dll")] public static extern uint timeBeginPeriod(uint p);
         [DllImport("winmm.dll")] public static extern uint timeEndPeriod(uint p);

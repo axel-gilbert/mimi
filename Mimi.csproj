@@ -12,7 +12,7 @@
     <RootNamespace>Mimi</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon Condition="Exists('assets\mimi.ico')">assets\mimi.ico</ApplicationIcon>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <PlatformTarget>x64</PlatformTarget>
     <Product>Mimi</Product>
     <Company>Mimi</Company>
@@ -29,6 +29,27 @@
     <Reference Include="WindowsBase" />
     <!-- JSON parsing of the GitHub Releases API (auto-update) -->
     <Reference Include="System.Runtime.Serialization" />
+    <!-- DPAPI: the couple's key is stored encrypted for the current Windows user -->
+    <Reference Include="System.Security" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- the test project lives in tests/ and is built separately -->
+    <Compile Remove="tests/**" />
+  </ItemGroup>
+
+  <!-- GIPHY key embedded at build time: dotnet build -p:GiphyApiKey=... (official releases use a repository secret) -->
+  <ItemGroup Condition="'$(GiphyApiKey)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GiphyApiKey</_Parameter1>
+      <_Parameter2>$(GiphyApiKey)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- translations, embedded in the exe -->
+    <EmbeddedResource Include="lang/*.ini" LogicalName="Mimi.lang.%(Filename).ini" />
+    <None Remove="tests/**" />
   </ItemGroup>
 
 </Project>
