@@ -86,7 +86,7 @@ Hearts rain on both screens: you're connected! 💞 From now on Mimi reconnects 
 | A few hearts | **Ctrl + Alt + H** |
 | A shower of hearts | press it again and again |
 | A big heart | **hold** Ctrl + Alt + H; it grows until you let go |
-| A message, a picture or a GIF | **Ctrl + Alt + M**, type, **Enter**. 🖼 or **Ctrl + V** for a picture, **GIF** to search a GIF |
+| A message, a picture or a GIF | **Ctrl + Alt + M**, type, **Enter**. **Photo**, **Ctrl + V** or drag & drop for a picture; **GIF** (or **Ctrl + G**) to pick a GIF |
 | A surprise | press at the same time as your partner 💞 |
 | Do not disturb | right-click the heart icon → **Do not disturb** |
 | Colours, sound, shortcuts, language, stats | click the heart icon |
@@ -213,7 +213,8 @@ git push origin v0.3.0
 | `src/Security.cs` | Encryption, authentication, anti-replay, ECDH pairing, DPAPI |
 | `src/ImageTransfer.cs` | Picture compression, chunking and reassembly |
 | `src/Giphy.cs` | GIF search, download and decoding |
-| `src/MessageBar.cs` | The message / picture / GIF bar |
+| `src/MessageBar.cs` + `src/GifGrid.cs` | The message bar and its GIF picker, drawn by hand |
+| `src/ColorText.cs` | Text with colour emoji (DirectWrite / Direct2D), Unicode-safe truncation |
 | `src/SettingsForm.cs` | Settings window (tabs, theme tiles, stats) |
 | `src/Stats.cs` | Statistics and streak |
 | `src/Updater.cs` | Self-update from GitHub Releases |

@@ -163,7 +163,7 @@ namespace Mimi
             if (f.Length < 3 || !int.TryParse(f[1], out int count) || !int.TryParse(f[2], out int size)) return null;
             if (count <= 0 || size <= 0 || size > ImageCodec.MaxBytes * 2 || count != (size + OutgoingImage.ChunkSize - 1) / OutgoingImage.ChunkSize) return null;
             string caption = f.Length > 3 ? f[3] : "";
-            if (caption.Length > 160) caption = caption.Substring(0, 160);
+            caption = TextUtil.Truncate(caption, 160);
             return new IncomingImage(f[0], count, size, caption, from);
         }
 

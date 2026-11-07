@@ -625,14 +625,14 @@ namespace Mimi
                 case "SYNC": { string th = ThemeOf(m.Body); Post(() => Sync?.Invoke(who, th)); break; }
                 case "MSG":
                     string text = (m.Body ?? "").Trim();
-                    if (text.Length > 160) text = text.Substring(0, 160);
+                    text = TextUtil.Truncate(text, 160);
                     if (text.Length > 0) Post(() => Note?.Invoke(who, text));
                     break;
                 case "GIF":
                 {
                     var g = (m.Body ?? "").Split(new[] { '|' }, 2);
                     string cap = g.Length > 1 ? g[1].Trim() : "";
-                    if (cap.Length > 160) cap = cap.Substring(0, 160);
+                    cap = TextUtil.Truncate(cap, 160);
                     if (Giphy.IsValidId(g[0])) Post(() => GifReceived?.Invoke(who, g[0], cap));
                     break;
                 }
@@ -682,7 +682,7 @@ namespace Mimi
         static string Clean(string s)
         {
             s = (s ?? "").Replace("|", " ").Replace('\u001f', ' ').Trim();
-            return s.Length > 24 ? s.Substring(0, 24) : s;
+            return TextUtil.Truncate(s, 24);
         }
 
         public static string LocalAddresses()

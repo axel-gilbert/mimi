@@ -296,7 +296,7 @@ namespace Mimi
             else s = L.F("status.waiting", Who);
             statusItem.Text = s;
             string tip = "Mimi — " + s;
-            tray.Text = tip.Length > 63 ? tip.Substring(0, 63) : tip;
+            tray.Text = TextUtil.Truncate(tip, 63);
             if (on && link.LastPeerName.Length > 0 && link.LastPeerName != Cfg.PeerName)
             {
                 Cfg.PeerName = link.LastPeerName;
@@ -435,7 +435,7 @@ namespace Mimi
         {
             if (!Cfg.IsPaired) { NotPairedToast(); return; }
             if (bar != null && !bar.IsDisposed) { bar.Activate(); return; }
-            bar = new MessageBar(iconOn, Giphy.ApiKey(Cfg));
+            bar = new MessageBar(iconOn, Giphy.ApiKey(Cfg), PeerDisplayName);
             bar.Sent += SendFromBar;
             bar.SentGif += (text, id) =>
             {
@@ -572,6 +572,15 @@ namespace Mimi
                     else if (int.TryParse(arg, out int m)) SetDnd(TimeSpan.FromMinutes(m));
                     break;
                 case "theme": Cfg.Theme = Art.NormalizeTheme(arg); break;
+                case "bar":
+                    if (bar == null || bar.IsDisposed) { var keep = Cfg.Peer; if (!Cfg.IsPaired) { Cfg.Key = Cfg.Key ?? new byte[32]; Cfg.Peer = "127.0.0.1"; } ShowMessageBar(); Cfg.Peer = keep; }
+                    if (arg.Length > 0) bar.TestSetText(arg);
+                    break;
+                case "bar-gif": bar?.TestOpenGifs(); break;
+                case "shownote": overlay.Note(PeerDisplayName, arg); break;
+                case "toast": overlay.Toast(arg); break;
+                case "bar-attach": bar?.TestAttach(arg); break;
+                case "bar-drag": bar?.TestDragOver(arg != "off"); break;
             }
         }
 

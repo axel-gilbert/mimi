@@ -627,12 +627,12 @@ namespace Mimi
                 using (var f2 = new Font("Segoe UI", 9.5f))
                 using (var f3 = new Font("Segoe UI Semibold", 8.5f))
                 {
-                    g.DrawString("Mimi", f1, Brushes.White, tx, r.Height * 0.1f);
-                    g.DrawString(L.T("set.subtitle"), f2, Brushes.White, tx + 3, r.Height * 0.56f);
+                    Txt.DrawString(g, "Mimi", f1, Brushes.White, tx, r.Height * 0.1f);
+                    Txt.DrawString(g, L.T("set.subtitle"), f2, Brushes.White, tx + 3, r.Height * 0.56f);
 
                     // status pill on the right
                     string status = app.StatusText ?? "";
-                    var sz = g.MeasureString(status, f3);
+                    var sz = Txt.MeasureString(g, status, f3);
                     float ph = sz.Height + 10, pw = sz.Width + ph;
                     var pill = new RectangleF(r.Width - pw - 14, (r.Height - ph) / 2, pw, ph);
                     using (var path = new GraphicsPath())
@@ -646,7 +646,7 @@ namespace Mimi
                     using (var db = new SolidBrush(dot))
                         g.FillEllipse(db, pill.X + ph * 0.32f, pill.Y + ph * 0.36f, ph * 0.28f, ph * 0.28f);
                     using (var tb = new SolidBrush(Ink))
-                        g.DrawString(status, f3, tb, pill.X + ph * 0.75f, pill.Y + 5);
+                        Txt.DrawString(g, status, f3, tb, pill.X + ph * 0.75f, pill.Y + 5);
                 }
             }
         }
@@ -725,7 +725,7 @@ namespace Mimi
             using (var b = new SolidBrush(selected ? SettingsForm.PinkDark : SettingsForm.Ink))
             {
                 var sf = new StringFormat { Alignment = StringAlignment.Center, Trimming = StringTrimming.EllipsisCharacter, FormatFlags = StringFormatFlags.NoWrap };
-                g.DrawString(Caption ?? "", f, b, new RectangleF(2, Height - captionH - 2, Width - 4, captionH), sf);
+                Txt.DrawString(g, Caption ?? "", f, b, new RectangleF(2, Height - captionH - 2, Width - 4, captionH), sf);
             }
         }
 
@@ -784,37 +784,37 @@ namespace Mimi
                     float x = rc.X + 12 * k, y = rc.Y + 10 * k;
                     if (i == 0)
                     {
-                        g.DrawString(L.T("stats.today").ToUpperInvariant(), title, pink, x, y);
-                        g.DrawString(today.Sent.ToString(), big, pink, x, y + 18 * k);
-                        var w1 = g.MeasureString(today.Sent.ToString(), big).Width;
-                        g.DrawString(today.Received.ToString(), big, lilac, x + Math.Max(w1, 40 * k) + 10 * k, y + 18 * k);
-                        g.DrawString(L.T("stats.sent") + "  ·  " + L.T("stats.received"), small, muted, x, y + 66 * k);
+                        Txt.DrawString(g, L.T("stats.today").ToUpperInvariant(), title, pink, x, y);
+                        Txt.DrawString(g, today.Sent.ToString(), big, pink, x, y + 18 * k);
+                        var w1 = Txt.MeasureString(g, today.Sent.ToString(), big).Width;
+                        Txt.DrawString(g, today.Received.ToString(), big, lilac, x + Math.Max(w1, 40 * k) + 10 * k, y + 18 * k);
+                        Txt.DrawString(g, L.T("stats.sent") + "  ·  " + L.T("stats.received"), small, muted, x, y + 66 * k);
                     }
                     else if (i == 1)
                     {
-                        g.DrawString(L.T("stats.streak.title"), title, pink, x, y);
-                        g.DrawString(streak.ToString(), big, ink, x, y + 18 * k);
-                        var w = g.MeasureString(streak.ToString(), big).Width;
+                        Txt.DrawString(g, L.T("stats.streak.title"), title, pink, x, y);
+                        Txt.DrawString(g, streak.ToString(), big, ink, x, y + 18 * k);
+                        var w = Txt.MeasureString(g, streak.ToString(), big).Width;
                         DrawFlame(g, x + w + 4 * k, y + 28 * k, 22 * k);
-                        g.DrawString(L.T("stats.streak"), small, muted, x, y + 66 * k);
+                        Txt.DrawString(g, L.T("stats.streak"), small, muted, x, y + 66 * k);
                     }
                     else
                     {
-                        g.DrawString(L.T("stats.total").ToUpperInvariant(), title, pink, x, y);
-                        g.DrawString(total.ToString("N0"), big, ink, x, y + 18 * k);
-                        g.DrawString(L.T("stats.hearts"), small, muted, x, y + 66 * k);
+                        Txt.DrawString(g, L.T("stats.total").ToUpperInvariant(), title, pink, x, y);
+                        Txt.DrawString(g, total.ToString("N0"), big, ink, x, y + 18 * k);
+                        Txt.DrawString(g, L.T("stats.hearts"), small, muted, x, y + 66 * k);
                     }
                 }
 
                 // ── 7-day chart ──
                 var chart = new RectangleF(pad, pad + cardH + gap, ClientSize.Width - 2 * pad, 190 * k);
                 Card(g, chart);
-                g.DrawString(L.T("stats.week").ToUpperInvariant(), title, pink, chart.X + 12 * k, chart.Y + 10 * k);
+                Txt.DrawString(g, L.T("stats.week").ToUpperInvariant(), title, pink, chart.X + 12 * k, chart.Y + 10 * k);
                 string you = L.T("stats.you"), them = app.PeerDisplayName.Length > 0 ? app.PeerDisplayName : L.T("your.half");
                 float lx = chart.Right - 12 * k;
-                var tw = g.MeasureString(them, small).Width; lx -= tw; g.DrawString(them, small, muted, lx, chart.Y + 9 * k);
+                var tw = Txt.MeasureString(g, them, small).Width; lx -= tw; Txt.DrawString(g, them, small, muted, lx, chart.Y + 9 * k);
                 lx -= 14 * k; g.FillEllipse(lilac, lx, chart.Y + 14 * k, 9 * k, 9 * k);
-                tw = g.MeasureString(you, small).Width; lx -= tw + 12 * k; g.DrawString(you, small, muted, lx, chart.Y + 9 * k);
+                tw = Txt.MeasureString(g, you, small).Width; lx -= tw + 12 * k; Txt.DrawString(g, you, small, muted, lx, chart.Y + 9 * k);
                 lx -= 14 * k; g.FillEllipse(pink, lx, chart.Y + 14 * k, 9 * k, 9 * k);
 
                 var days = st.LastDays(7);
@@ -832,8 +832,8 @@ namespace Mimi
                     Bar(g, pink, cx - bw - 1.5f * k, plotBottom, bw, hs);
                     Bar(g, lilac, cx + 1.5f * k, plotBottom, bw, hr);
                     string lbl = days[i].day.ToString("ddd", culture);
-                    var ls = g.MeasureString(lbl, small);
-                    g.DrawString(lbl, small, i == days.Count - 1 ? pink : muted, cx - ls.Width / 2, plotBottom + 4 * k);
+                    var ls = Txt.MeasureString(g, lbl, small);
+                    Txt.DrawString(g, lbl, small, i == days.Count - 1 ? pink : muted, cx - ls.Width / 2, plotBottom + 4 * k);
                 }
 
                 // ── small totals ──
@@ -850,11 +850,11 @@ namespace Mimi
                 for (int i = 0; i < items.Length; i++)
                 {
                     string n = items[i].Item1.ToString("N0");
-                    var ns = g.MeasureString(n, mid);
-                    var ts = g.MeasureString(items[i].Item2, small);
+                    var ns = Txt.MeasureString(g, n, mid);
+                    var ts = Txt.MeasureString(g, items[i].Item2, small);
                     float cx = foot.X + iw * (i + 0.5f);
-                    g.DrawString(n, mid, ink, cx - ns.Width / 2, foot.Y + 8 * k);
-                    g.DrawString(items[i].Item2, small, muted, cx - ts.Width / 2, foot.Y + 36 * k);
+                    Txt.DrawString(g, n, mid, ink, cx - ns.Width / 2, foot.Y + 8 * k);
+                    Txt.DrawString(g, items[i].Item2, small, muted, cx - ts.Width / 2, foot.Y + 36 * k);
                 }
             }
         }

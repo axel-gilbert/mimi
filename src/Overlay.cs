@@ -705,7 +705,7 @@ namespace Mimi
             if (alpha <= 0.01f) return;
 
             g.ResetTransform();
-            var ts = g.MeasureString(p.Text, toastFont);
+            var ts = Txt.MeasureString(g, p.Text, toastFont);
             float h = ts.Height * 1.6f;
             float icon = h * 0.6f;
             float w = ts.Width + icon + h * 0.8f;
@@ -729,7 +729,7 @@ namespace Mimi
             DrawSprite(Art.Hearts[0], rect.X + h * 0.4f + icon / 2 + vs.X, rect.Y + h / 2 + vs.Y, icon * beat, 0, 1, 1, 0, alpha);
             g.ResetTransform();
             using (var tb = new SolidBrush(Color.FromArgb((int)(255 * alpha), 214, 51, 108)))
-                g.DrawString(p.Text, toastFont, tb, rect.X + h * 0.4f + icon + h * 0.15f, rect.Y + (h - ts.Height) / 2);
+                Txt.DrawString(g, p.Text, toastFont, tb, rect.X + h * 0.4f + icon + h * 0.15f, rect.Y + (h - ts.Height) / 2);
         }
 
         /// <summary>Picture card: the picture with a white frame, the sender's name and the caption below.</summary>
@@ -755,8 +755,8 @@ namespace Mimi
             float pad = unit * 0.014f;
             float iw = p.ImgW, ih = p.ImgH;
             string from = p.Owner ?? "";
-            var fromSize = g.MeasureString(from, noteFromFont);
-            SizeF capSize = p.Text.Length > 0 ? g.MeasureString(p.Text, noteFont, (int)Math.Max(iw, unit * 0.3f)) : SizeF.Empty;
+            var fromSize = Txt.MeasureString(g, from, noteFromFont);
+            SizeF capSize = p.Text.Length > 0 ? Txt.MeasureString(g, p.Text, noteFont, (int)Math.Max(iw, unit * 0.3f)) : SizeF.Empty;
             float w = Math.Max(iw, capSize.Width) + pad * 2;
             float h = ih + pad * 2 + fromSize.Height + pad * 0.5f + (capSize.Height > 0 ? capSize.Height + pad * 0.3f : 0);
             float cx = a.Left + a.Width / 2f - vs.X;
@@ -798,10 +798,10 @@ namespace Mimi
             g.InterpolationMode = oldInterp;
             float ty = imgRect.Bottom + pad * 0.5f;
             using (var fb = new SolidBrush(Color.FromArgb((int)(255 * alpha), 214, 51, 108)))
-                g.DrawString(from, noteFromFont, fb, rect.X + pad, ty);
+                Txt.DrawString(g, from, noteFromFont, fb, rect.X + pad, ty);
             if (capSize.Height > 0)
                 using (var tb = new SolidBrush(Color.FromArgb((int)(255 * alpha), 72, 40, 56)))
-                    g.DrawString(p.Text, noteFont, tb, new RectangleF(rect.X + pad, ty + fromSize.Height + pad * 0.3f, w - pad * 2 + 2, capSize.Height + 2));
+                    Txt.DrawString(g, p.Text, noteFont, tb, new RectangleF(rect.X + pad, ty + fromSize.Height + pad * 0.3f, w - pad * 2 + 2, capSize.Height + 2));
             g.ResetTransform();
         }
 
@@ -821,9 +821,9 @@ namespace Mimi
             g.ResetTransform();
             float maxW = Math.Min(a.Width * 0.6f, unit * 1.1f);
             float pad = unit * 0.03f;
-            var textSize = g.MeasureString(p.Text, noteFont, (int)maxW);
+            var textSize = Txt.MeasureString(g, p.Text, noteFont, (int)maxW);
             string from = p.Owner ?? "";
-            var fromSize = g.MeasureString(from, noteFromFont);
+            var fromSize = Txt.MeasureString(g, from, noteFromFont);
             float icon = fromSize.Height * 1.1f;
             float w = Math.Max(textSize.Width, fromSize.Width + icon * 1.3f) + pad * 2;
             float h = fromSize.Height + unit * 0.012f + textSize.Height + pad * 2;
@@ -851,9 +851,9 @@ namespace Mimi
                     g.DrawPath(pen, path);
             }
             using (var fb = new SolidBrush(Color.FromArgb((int)(255 * alpha), 214, 51, 108)))
-                g.DrawString(from, noteFromFont, fb, rect.X + pad + icon * 1.2f, rect.Y + pad);
+                Txt.DrawString(g, from, noteFromFont, fb, rect.X + pad + icon * 1.2f, rect.Y + pad);
             using (var tb = new SolidBrush(Color.FromArgb((int)(255 * alpha), 72, 40, 56)))
-                g.DrawString(p.Text, noteFont, tb, new RectangleF(rect.X + pad, rect.Y + pad + fromSize.Height + unit * 0.012f, maxW + 2, textSize.Height + 2));
+                Txt.DrawString(g, p.Text, noteFont, tb, new RectangleF(rect.X + pad, rect.Y + pad + fromSize.Height + unit * 0.012f, maxW + 2, textSize.Height + 2));
             g.ResetTransform();
 
             // beating heart next to the sender's name (drawn by the blitter, so positioned by hand)
