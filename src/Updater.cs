@@ -174,7 +174,8 @@ namespace Mimi
             string args = "--updated";
             if (Program.Profile != "default") args += " --profile " + Program.Profile;
             if (Program.Portable) args += " --portable";
-            Process.Start(new ProcessStartInfo(cur, args) { UseShellExecute = false, WorkingDirectory = Path.GetDirectoryName(cur) });
+            // ShellExecute: the new version inherits nothing from this one (no socket, no file handle).
+            Process.Start(new ProcessStartInfo(cur, args) { UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(cur) });
         }
 
         /// <summary>Deletes the old version left behind by an update.</summary>

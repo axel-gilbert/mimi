@@ -63,6 +63,12 @@ namespace Mimi
         readonly Dictionary<string, PendingJoin> pending = new Dictionary<string, PendingJoin>();
         sealed class PendingJoin { public byte[] Master, JoinerPub; public string Name; public byte[] PairOk; }
 
+        /// <summary>Ports Mimi may use: the usual one first, then a few spare ones if it is taken.</summary>
+        public const int PortRange = 10;
+
+        /// <summary>The UDP port actually in use (may differ from the setting if that one was taken).</summary>
+        public int BoundPort { get; private set; }
+
         public string Error { get; private set; }
         public string LastPeerName = "";
 
@@ -98,20 +104,43 @@ namespace Mimi
 
         public void Start()
         {
-            try
+            // The configured port first; if another program holds it, a few spare ports. The partner
+            // follows automatically: it learns our new port from the (authenticated) packets we send.
+            Exception last = null;
+            for (int i = 0; i < PortRange && udp == null; i++)
             {
-                udp = new UdpClient(AddressFamily.InterNetwork);
-                udp.Client.ExclusiveAddressUse = true;
-                udp.EnableBroadcast = true;
-                udp.Client.Bind(new IPEndPoint(IPAddress.Any, cfg.Port));
-                try { udp.Client.IOControl(SIO_UDP_CONNRESET, new byte[4], null); } catch { }
+                int port = cfg.Port + i;
+                if (port > 65535) break;
+                try
+                {
+                    var u = new UdpClient(AddressFamily.InterNetwork);
+                    // Never let a child process inherit the socket (that is what kept the port busy after updates).
+                    try { Native.SetHandleInformation(u.Client.Handle, Native.HANDLE_FLAG_INHERIT, 0); } catch { }
+                    u.Client.ExclusiveAddressUse = true;
+                    u.EnableBroadcast = true;
+                    try
+                    {
+                        u.Client.Bind(new IPEndPoint(IPAddress.Any, port));
+                    }
+                    catch
+                    {
+                        u.Close();
+                        throw;
+                    }
+                    try { u.Client.IOControl(SIO_UDP_CONNRESET, new byte[4], null); } catch { }
+                    udp = u;
+                    BoundPort = port;
+                    Program.Trace("listening on UDP " + port);
+                }
+                catch (Exception e)
+                {
+                    last = e;
+                    Program.Trace("bind " + port + " failed: " + e.Message);
+                }
             }
-            catch (Exception e)
+            if (udp == null)
             {
-                Error = L.F("net.portused", cfg.Port, e.Message);
-                Program.Trace("bind failed: " + e.Message);
-                try { udp?.Close(); } catch { }
-                udp = null;
+                Error = L.F("net.portused", cfg.Port, last?.Message ?? "?");
                 return;
             }
             alive = true;
@@ -303,13 +332,13 @@ namespace Mimi
         {
             var u = udp;
             if (u == null) return;
-            int[] ports = { Config.DefaultPort, Config.DefaultPort + 1 };
+            var ports = Enumerable.Range(Config.DefaultPort, PortRange + 1).ToArray();
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 var targets = new List<IPEndPoint>();
                 foreach (var ip in new[] { IPAddress.Broadcast, IPAddress.Loopback }.Concat(DirectedBroadcasts()).Distinct())
                     foreach (var port in ports)
-                        if (!(ip.Equals(IPAddress.Loopback) && port == cfg.Port)) targets.Add(new IPEndPoint(ip, port));
+                        if (!(ip.Equals(IPAddress.Loopback) && port == BoundPort)) targets.Add(new IPEndPoint(ip, port));
                 if (!string.IsNullOrWhiteSpace(extraPeer))
                     try { var ep = Resolve(extraPeer); if (ep != null) targets.Add(ep); } catch { }
                 foreach (var ep in targets)

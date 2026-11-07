@@ -22,7 +22,7 @@ namespace Mimi
         [STAThread]
         static void Main(string[] args)
         {
-            bool welcome = false, demo = false, uninstall = false, updated = false;
+            bool welcome = false, demo = false, uninstall = false, updated = false, clean = false;
             string exportIcon = null, recordDemo = null;
             for (int i = 0; i < args.Length; i++)
             {
@@ -35,6 +35,7 @@ namespace Mimi
                     case "--welcome": welcome = true; break;
                     case "--demo": demo = true; break;
                     case "--updated": updated = true; break;
+                    case "--clean": clean = true; break;
                     case "--uninstall": uninstall = true; break;
                     case "--export-icon" when i + 1 < args.Length: exportIcon = args[++i]; break;
                     case "--record-demo" when i + 1 < args.Length: recordDemo = args[++i]; break;
@@ -55,6 +56,21 @@ namespace Mimi
             AppDomain.CurrentDomain.UnhandledException += (s, e) => LogError(e.ExceptionObject as Exception);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            // Started by an updater (Mimi 0.3.0 and older launched the new version in a way that passed it
+            // their open handles, including the network socket, which then kept the port "already in use").
+            // Relaunch once through the shell so this process starts with nothing inherited.
+            if (updated && !clean)
+            {
+                try
+                {
+                    var rest = Environment.GetCommandLineArgs();
+                    string args2 = string.Join(" ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Skip(rest, 1), a => a.Contains(" ") ? "\"" + a + "\"" : a)) + " --clean";
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Application.ExecutablePath, args2) { UseShellExecute = true });
+                    return;
+                }
+                catch { /* carry on in this process */ }
+            }
 
             L.Code = Config.Load().Lang;
 

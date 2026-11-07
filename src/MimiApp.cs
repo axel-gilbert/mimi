@@ -247,7 +247,19 @@ namespace Mimi
                 settings?.RefreshFromConfig();
             };
             link.Start();
-            if (link.Error != null) Balloon(L.T("net.problem"), link.Error, ToolTipIcon.Warning);
+            if (link.Error != null)
+            {
+                Balloon(L.T("net.problem"), link.Error, ToolTipIcon.Warning);
+                // try again a bit later: the port may just be busy for a moment
+                var retry = new System.Windows.Forms.Timer { Interval = 20000 };
+                var mine = link;
+                retry.Tick += (s, e) =>
+                {
+                    retry.Stop(); retry.Dispose();
+                    if (link == mine && link.Error != null) { StartLink(); UpdateStatus(); }
+                };
+                retry.Start();
+            }
         }
 
         public PeerLink Link => link;

@@ -69,6 +69,9 @@ namespace Mimi
         [DllImport("user32.dll")] public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         [DllImport("user32.dll")] public static extern short GetKeyState(int vk);
         [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int vk);
+        /// <summary>Used to stop a handle (e.g. the UDP socket) from being inherited by child processes.</summary>
+        [DllImport("kernel32.dll", SetLastError = true)] public static extern bool SetHandleInformation(IntPtr handle, uint mask, uint flags);
+        public const uint HANDLE_FLAG_INHERIT = 1;
         [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
         [DllImport("kernel32.dll", EntryPoint = "RtlZeroMemory")] public static extern void ZeroMemory(IntPtr dest, IntPtr size);
 
