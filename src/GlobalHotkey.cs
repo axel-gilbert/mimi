@@ -52,10 +52,10 @@ namespace Mimi
         public static string Describe(int mods, Keys key)
         {
             var parts = new List<string>();
-            if ((mods & MOD_CONTROL) != 0) parts.Add("Ctrl");
-            if ((mods & MOD_ALT) != 0) parts.Add("Alt");
-            if ((mods & MOD_SHIFT) != 0) parts.Add("Maj");
-            if ((mods & MOD_WIN) != 0) parts.Add("Win");
+            if ((mods & MOD_CONTROL) != 0) parts.Add(L.T("key.ctrl"));
+            if ((mods & MOD_ALT) != 0) parts.Add(L.T("key.alt"));
+            if ((mods & MOD_SHIFT) != 0) parts.Add(L.T("key.shift"));
+            if ((mods & MOD_WIN) != 0) parts.Add(L.T("key.win"));
             if (key != Keys.None) parts.Add(KeyName(key));
             return string.Join(" + ", parts);
         }
@@ -63,27 +63,27 @@ namespace Mimi
         static string KeyName(Keys k)
         {
             if (k >= Keys.D0 && k <= Keys.D9) return ((char)('0' + (k - Keys.D0))).ToString();
-            if (k >= Keys.NumPad0 && k <= Keys.NumPad9) return "Pavé " + (k - Keys.NumPad0);
+            if (k >= Keys.NumPad0 && k <= Keys.NumPad9) return L.T("key.numpad") + " " + (k - Keys.NumPad0);
             switch (k)
             {
-                case Keys.Space: return "Espace";
-                case Keys.Return: return "Entrée";
+                case Keys.Space: return L.T("key.space");
+                case Keys.Return: return L.T("key.enter");
                 case Keys.Up: return "↑";
                 case Keys.Down: return "↓";
                 case Keys.Left: return "←";
                 case Keys.Right: return "→";
                 case Keys.Oemplus: return "+";
                 case Keys.OemMinus: return "-";
-                case Keys.Multiply: return "Pavé *";
-                case Keys.Add: return "Pavé +";
-                case Keys.Subtract: return "Pavé -";
-                case Keys.Divide: return "Pavé /";
-                case Keys.Scroll: return "Arrêt défil";
-                case Keys.Insert: return "Inser";
-                case Keys.Home: return "Début";
-                case Keys.End: return "Fin";
-                case Keys.PageUp: return "Pg préc";
-                case Keys.PageDown: return "Pg suiv";
+                case Keys.Multiply: return L.T("key.numpad") + " *";
+                case Keys.Add: return L.T("key.numpad") + " +";
+                case Keys.Subtract: return L.T("key.numpad") + " -";
+                case Keys.Divide: return L.T("key.numpad") + " /";
+                case Keys.Scroll: return L.T("key.scroll");
+                case Keys.Insert: return L.T("key.insert");
+                case Keys.Home: return L.T("key.home");
+                case Keys.End: return L.T("key.end");
+                case Keys.PageUp: return L.T("key.pgup");
+                case Keys.PageDown: return L.T("key.pgdn");
             }
             return k.ToString();
         }

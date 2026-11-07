@@ -59,13 +59,7 @@ namespace Mimi
         /// <summary>Propose l'installation. Renvoie true si ce processus doit s'arrêter.</summary>
         public static bool OfferInstall()
         {
-            string msg = IsInstalled
-                ? "Mimi est déjà installé sur ce PC.\n\nOui : mettre à jour avec cette version\nNon : juste lancer cette copie"
-                : "Installer Mimi sur ce PC ?\n\n" +
-                  "• il démarrera tout seul avec Windows\n" +
-                  "• il reste discret, près de l'horloge 💗\n" +
-                  "• Windows te demandera peut-être d'autoriser le réseau\n\n" +
-                  "Oui : installer      Non : juste l'essayer";
+            string msg = IsInstalled ? L.T("install.already") : L.T("install.ask");
             var r = MessageBox.Show(msg, "Mimi", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (r == DialogResult.Cancel) return true;
             if (r == DialogResult.No) return false;
@@ -75,11 +69,22 @@ namespace Mimi
             }
             catch (Exception e)
             {
-                MessageBox.Show("Oups, l'installation a échoué :\n" + e.Message, "Mimi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(L.F("install.failed", e.Message), "Mimi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return true;
             }
             Process.Start(InstalledExe, "--welcome");
             return true;
+        }
+
+        /// <summary>After a self-update: refresh the version shown in Windows "Installed apps".</summary>
+        public static void RefreshVersion()
+        {
+            try
+            {
+                using (var k = Registry.CurrentUser.OpenSubKey(UninstallKey, true))
+                    k?.SetValue("DisplayVersion", Version);
+            }
+            catch { }
         }
 
         static void Install()
@@ -139,7 +144,7 @@ namespace Mimi
                 var lt = lnk.GetType();
                 lt.InvokeMember("TargetPath", BindingFlags.SetProperty, null, lnk, new object[] { target });
                 lt.InvokeMember("WorkingDirectory", BindingFlags.SetProperty, null, lnk, new object[] { Path.GetDirectoryName(target) });
-                lt.InvokeMember("Description", BindingFlags.SetProperty, null, lnk, new object[] { "Des cœurs pour ta moitié" });
+                lt.InvokeMember("Description", BindingFlags.SetProperty, null, lnk, new object[] { L.T("shortcut.desc") });
                 lt.InvokeMember("IconLocation", BindingFlags.SetProperty, null, lnk, new object[] { target + ",0" });
                 lt.InvokeMember("Save", BindingFlags.InvokeMethod, null, lnk, null);
             }
@@ -168,7 +173,7 @@ namespace Mimi
         /// <summary>Renvoie true si la désinstallation a eu lieu.</summary>
         public static bool Uninstall(bool fromRunningApp)
         {
-            if (MessageBox.Show("Désinstaller Mimi de ce PC ?", "Mimi",
+            if (MessageBox.Show(L.T("uninstall.ask"), "Mimi",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 return false;
 
@@ -189,7 +194,7 @@ namespace Mimi
 
             RunElevated("/c netsh advfirewall firewall delete rule name=\"" + FirewallRule + "\"");
 
-            MessageBox.Show("Mimi a été désinstallé. À bientôt 💔", "Mimi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(L.T("uninstall.done"), "Mimi", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             if (Directory.Exists(InstallDir))
             {

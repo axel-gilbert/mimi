@@ -12,12 +12,12 @@
     <RootNamespace>Mimi</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon Condition="Exists('assets\mimi.ico')">assets\mimi.ico</ApplicationIcon>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <PlatformTarget>x64</PlatformTarget>
     <Product>Mimi</Product>
     <Company>Mimi</Company>
-    <Description>Des cœurs pour ta moitié</Description>
-    <Copyright>Fait avec amour</Copyright>
+    <Description>Hearts for your other half</Description>
+    <Copyright>Made with love</Copyright>
     <DebugType>none</DebugType>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <SatelliteResourceLanguages>fr</SatelliteResourceLanguages>
@@ -27,6 +27,8 @@
     <!-- MediaPlayer (WPF) pour jouer plusieurs sons en même temps -->
     <Reference Include="PresentationCore" />
     <Reference Include="WindowsBase" />
+    <!-- JSON parsing of the GitHub Releases API (auto-update) -->
+    <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
 
 </Project>

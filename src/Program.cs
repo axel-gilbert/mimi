@@ -15,7 +15,7 @@ namespace Mimi
         [STAThread]
         static void Main(string[] args)
         {
-            bool welcome = false, demo = false, uninstall = false;
+            bool welcome = false, demo = false, uninstall = false, updated = false;
             string exportIcon = null;
             for (int i = 0; i < args.Length; i++)
             {
@@ -27,6 +27,7 @@ namespace Mimi
                     case "--portable": Portable = true; break;
                     case "--welcome": welcome = true; break;
                     case "--demo": demo = true; break;
+                    case "--updated": updated = true; break;
                     case "--uninstall": uninstall = true; break;
                     case "--export-icon" when i + 1 < args.Length: exportIcon = args[++i]; break;
                     case "--pair-host" when i + 1 < args.Length: TestPairHost = args[++i]; break;
@@ -38,12 +39,14 @@ namespace Mimi
             // Mimi passe toujours après tes jeux et applis : jamais de lag.
             try { System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.BelowNormal; } catch { }
 
-            // Toute erreur est journalisée dans %APPDATA%\Mimi\<profil>\erreurs.log au lieu de faire planter l'appli.
+            // Any error is logged to %APPDATA%\Mimi\<profile>\errors.log instead of crashing the app.
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application.ThreadException += (s, e) => LogError(e.Exception);
             AppDomain.CurrentDomain.UnhandledException += (s, e) => LogError(e.ExceptionObject as Exception);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            L.Code = Config.Load().Lang;
 
             if (exportIcon != null) { Art.Init(); Art.ExportIco(exportIcon); return; }
             if (uninstall) { Installer.Uninstall(false); return; }
@@ -56,6 +59,12 @@ namespace Mimi
 
             using (var mutex = new Mutex(true, "Mimi_" + Profile, out bool first))
             {
+                if (!first && updated)
+                {
+                    // Just updated: wait for the previous version to finish closing.
+                    try { first = mutex.WaitOne(15000); }
+                    catch (AbandonedMutexException) { first = true; }
+                }
                 if (!first)
                 {
                     // Déjà lancé : on demande à l'instance existante d'ouvrir ses réglages.
@@ -65,7 +74,7 @@ namespace Mimi
                 using (var show = new EventWaitHandle(false, EventResetMode.AutoReset, "Mimi_" + Profile + "_show"))
                 using (var quit = new EventWaitHandle(false, EventResetMode.AutoReset, "Mimi_" + Profile + "_quit"))
                 {
-                    Application.Run(new MimiApp(show, quit, welcome, demo));
+                    Application.Run(new MimiApp(show, quit, welcome, demo, updated));
                 }
                 GC.KeepAlive(mutex);
             }
@@ -76,7 +85,7 @@ namespace Mimi
             try
             {
                 System.IO.Directory.CreateDirectory(Config.Dir);
-                System.IO.File.AppendAllText(System.IO.Path.Combine(Config.Dir, "erreurs.log"),
+                System.IO.File.AppendAllText(System.IO.Path.Combine(Config.Dir, "errors.log"),
                     DateTime.Now.ToString("s") + "  " + e + Environment.NewLine + Environment.NewLine);
             }
             catch { }

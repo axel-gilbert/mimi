@@ -22,6 +22,8 @@ namespace Mimi
         public bool Sound = true;
         public bool Echo = true;          // voir aussi ses propres cœurs envoyés
         public int Corner = 0;            // 0 bas droite, 1 bas gauche, 2 bas centre
+        public bool AutoUpdate = true;    // mises à jour automatiques via GitHub Releases
+        public string Lang = "en";        // "en" ou "fr"
         public bool Exists;               // fichier déjà présent (sinon premier lancement)
 
         public static string Dir => Path.Combine(
@@ -64,6 +66,8 @@ namespace Mimi
                 if (d.TryGetValue("Sound", out s) && bool.TryParse(s, out b)) c.Sound = b;
                 if (d.TryGetValue("Echo", out s) && bool.TryParse(s, out b)) c.Echo = b;
                 if (d.TryGetValue("Corner", out s) && int.TryParse(s, out n) && n >= 0 && n <= 2) c.Corner = n;
+                if (d.TryGetValue("AutoUpdate", out s) && bool.TryParse(s, out b)) c.AutoUpdate = b;
+                if (d.TryGetValue("Lang", out s) && (s == "en" || s == "fr")) c.Lang = s;
             }
             catch { /* réglages par défaut */ }
             return c;
@@ -87,6 +91,8 @@ namespace Mimi
                 sb.AppendLine("Sound=" + Sound);
                 sb.AppendLine("Echo=" + Echo);
                 sb.AppendLine("Corner=" + Corner);
+                sb.AppendLine("AutoUpdate=" + AutoUpdate);
+                sb.AppendLine("Lang=" + Lang);
                 File.WriteAllText(FilePath, sb.ToString(), new UTF8Encoding(false));
                 Exists = true;
             }

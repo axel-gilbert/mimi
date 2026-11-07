@@ -90,7 +90,7 @@ namespace Mimi
             }
             catch (Exception e)
             {
-                Error = "Le port " + cfg.Port + " est déjà utilisé (" + e.Message + ")";
+                Error = L.F("net.portused", cfg.Port, e.Message);
                 try { udp?.Close(); } catch { }
                 udp = null;
                 return;
@@ -314,7 +314,7 @@ namespace Mimi
             if (name.Length > 0) LastPeerName = name;
 
             if (type == "PING") SendTo(Packet(CoupleTag, "PONG"), from);
-            else if (type == "HEART") Post(() => Heart?.Invoke(LastPeerName.Length > 0 ? LastPeerName : "Ta moitié"));
+            else if (type == "HEART") Post(() => Heart?.Invoke(LastPeerName.Length > 0 ? LastPeerName : L.T("Your.half")));
 
             Post(() =>
             {

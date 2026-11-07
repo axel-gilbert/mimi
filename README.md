@@ -1,100 +1,172 @@
 # Mimi 💗
 
-> *« c'est mimi »* : des cœurs pour ta moitié.
+**Send little hearts to your other half's screen with one key.**
 
-Mimi est un tout petit logiciel Windows pour les couples. Tu appuies sur ton raccourci
-(par défaut **Ctrl + Alt + H**), et un flux de petits cœurs monte dans le coin de l'écran
-de l'autre, comme les likes d'un live TikTok, avec un petit son tout doux.
-Plus tu spammes, plus le flux est dense (sans jamais envahir l'écran). Au 10ᵉ, 25ᵉ et 50ᵉ cœur
-d'affilée, un gros cœur monte et éclate en mini-cœurs.
+You press a shortcut on your PC (by default **Ctrl + Alt + H**), and a stream of small animated hearts
+floats up in the corner of your partner's screen, with a soft, cute sound, just like likes on a live stream.
+The more you press, the more hearts. 💕
 
-- **Un seul fichier** `Mimi.exe` (~150 Ko), rien à installer à côté (.NET Framework 4.8, déjà dans Windows 10/11).
-- **Pair-à-pair** : les deux PC se parlent directement en UDP, sans serveur ni compte.
-- **Appairage par code** à 6 chiffres.
-- **Démarre avec Windows** et se connecte tout seul.
-- **Léger** : 0 % CPU au repos (la fenêtre de rendu est cachée). Pendant un spam de 40 cœurs,
-  environ 5 % d'un cœur CPU (rendu logiciel maison, seule la zone qui bouge est mise à jour,
-  budget de particules auto-régulé, priorité « inférieure à la normale »).
-- **S'adapte à l'écran** : tailles calculées d'après la hauteur de l'écran (16:9, 21:9, 32:9, 4K, mise à l'échelle Windows).
-- **Discret** : les cœurs restent dans un coin (bas droite, bas gauche ou bas centre, au choix), et les clics passent au travers.
+- Tiny: a single 150 KB file, nothing else to install
+- No account, no server: the two PCs talk directly to each other
+- Starts with Windows and updates itself
+- Never slows your PC down, even while gaming
+- English or French
 
-## Installer
+<p align="center"><img src="docs/settings.png" width="340" alt="Mimi settings window"></p>
 
-1. Copie `Mimi.exe` sur chaque PC (clé USB, Discord, etc.).
-2. Double-clique dessus et réponds **Oui** à « Installer Mimi sur ce PC ? ».
-   - Mimi s'installe dans `%LOCALAPPDATA%\Programs\Mimi` (pas besoin d'être administrateur).
-   - Windows demande une autorisation pour ajouter la règle du pare-feu ; accepte-la.
-     Si tu la refuses, Windows posera la question au premier lancement.
-3. La fenêtre de réglages s'ouvre : mets ton prénom.
+---
 
-Pour mettre à jour, relance simplement un `Mimi.exe` plus récent et réponds **Oui**.
+## 1. Install it (on both PCs)
 
-## S'appairer (une seule fois)
+1. **Download** `Mimi-…-win-x64.exe` from the [latest release](https://github.com/axel-gilbert/mimi/releases/latest).
+2. **Double-click** the file.
+   - If a blue window says *"Windows protected your PC"*, click **More info**, then **Run anyway**.
+     (This only appears because Mimi is a small free app that isn't signed by a company.)
+3. Mimi asks *"Install Mimi on this PC?"*: click **Yes**.
+4. If Windows asks for permission (network or *"Do you want to allow this app…"*), click **Yes / Allow**.
+5. The Mimi window opens. Type **your name**.
 
-Les deux PC doivent être sur **la même box / le même Wi-Fi** pour l'appairage.
+Do the same on your partner's PC. ✅
 
-1. Sur le PC n°1 : **Créer un code**. Un code à 6 chiffres s'affiche (valable 5 minutes).
-2. Sur le PC n°2 : tape ce code puis clique sur **Rejoindre**.
-3. Les cœurs pleuvent, c'est appairé 💞
+> Mimi now lives near the clock, at the bottom right of the screen (a small heart icon).
+> If you don't see it, click the little **^** arrow next to the clock.
 
-Ensuite, si l'adresse IP d'un des PC change (box redémarrée…), Mimi retrouve l'autre tout seul sur le réseau local.
+## 2. Connect the two PCs (only once)
 
-### Et à distance, sur deux réseaux différents ?
+Both PCs must be **at the same place, on the same Wi-Fi / internet box** for this step.
 
-Mimi est en pair-à-pair, sans serveur, donc les deux PC doivent pouvoir se joindre.
-Le plus simple est d'installer [Tailscale](https://tailscale.com) (gratuit) sur les deux PC.
-Ensuite, dans **Réglages → Avancé**, mets l'adresse Tailscale de l'autre (`100.x.y.z`) des deux côtés.
-Autre solution : rediriger le port UDP **47777** sur la box.
-
-## Utilisation
-
-| Action | Comment |
+| On PC 1 | On PC 2 |
 |---|---|
-| Envoyer un cœur | ton raccourci (configurable dans les réglages) |
-| Pluie de cœurs | spamme le raccourci ou garde-le appuyé |
-| Changer de coin | Réglages → *Les cœurs apparaissent…* |
-| Réglages / appairage | clic sur l'icône cœur près de l'horloge |
-| Tester l'animation chez soi | clic droit sur l'icône → *Tester l'animation* |
-| Désinstaller | clic droit → *Désinstaller…*, ou Paramètres Windows → Applications |
+| Click **Create a code**. A 6-digit code appears. | Type that code, then click **Join**. |
 
-L'icône est **rose** quand ta moitié est connectée, **grise** sinon.
+Hearts rain on both screens: you're connected! 💞
+From now on, Mimi reconnects by itself every time the PCs are turned on.
 
-> Les cœurs s'affichent au-dessus de toutes les fenêtres, y compris les jeux en *plein écran fenêtré / sans bordure*.
-> En plein écran *exclusif*, Windows ne laisse rien s'afficher par-dessus.
+## 3. Send hearts
 
-## Tester sur un seul PC
+- Press **Ctrl + Alt + H**. Press it again and again (or hold it) for a shower of hearts.
+- The heart icon near the clock is **pink** when your partner is connected and **grey** when they're not.
+- To change the shortcut, the sound, the corner where hearts appear or the language:
+  click the heart icon to open the **settings**, change what you want and click **Save**.
 
-```powershell
-.\Mimi.exe --profile A --pair-host 123456
-.\Mimi.exe --profile B --pair-join 123456
+## Questions
+
+**My partner doesn't receive anything.**
+Check that their heart icon is pink. If it's grey, their PC is off, Mimi is closed, or you're not on the same network
+(see below).
+
+**We don't live together / we're on different networks.**
+Mimi connects the PCs directly, so they need to "see" each other. The easiest free way:
+1. Install [Tailscale](https://tailscale.com/download) on both PCs and sign in with the same account.
+2. In Tailscale, note the address of each PC (it looks like `100.x.y.z`).
+3. In Mimi's settings, under **Advanced**, type the *other* PC's Tailscale address, on both PCs. Click **Save**.
+
+**I don't see hearts during a game.**
+Hearts are shown above everything, but games in *exclusive full screen* hide them. Use *borderless window* mode in the game's settings.
+
+**How do updates work?**
+Mimi checks for a new version when it starts and every 6 hours. If there is one, it downloads it, checks it,
+installs it and restarts by itself. You'll see *"Mimi updated"*. You can turn this off in the settings,
+or check by hand: right-click the heart icon, then **Check for updates**.
+
+**How do I uninstall it?**
+Right-click the heart icon, then **Uninstall…**, or use *Windows Settings → Apps*.
+
+---
+
+## How it works
+
+```mermaid
+flowchart LR
+    subgraph A["💻 Your PC"]
+        K["⌨️ Global shortcut<br/>Ctrl+Alt+H"] --> M1["Mimi.exe<br/>(tray app)"]
+    end
+    subgraph B["💻 Your partner's PC"]
+        M2["Mimi.exe<br/>(tray app)"] --> O["❤️ Transparent overlay<br/>hearts + sound"]
+    end
+    M1 <-->|"UDP port 47777, direct (peer-to-peer)<br/>same Wi-Fi, or Tailscale VPN when far apart"| M2
+    G[("GitHub Releases")] -.->|"HTTPS: update check<br/>at start + every 6 h"| M1
+    G -.-> M2
 ```
 
-Chaque profil a ses propres réglages (`%APPDATA%\Mimi\<profil>`). Il faut donner un port
-différent à chacun : le profil A utilise 47777, les autres 47778 par défaut.
-Le raccourci de B est **Ctrl + Alt + J**.
+- **No server.** The two Mimi apps send each other tiny UDP messages:
+  `HEART` (one per key press) and `PING`/`PONG` every few seconds to know if the other one is online.
+- **Private.** Each message carries a fingerprint (SHA-256) of your pairing code, never the code itself.
+  Messages from other couples are ignored.
+- **Light.** The overlay window is hidden when nothing moves (0 % CPU). While hearts fly,
+  a small home-made renderer only redraws the area that changes (around 5 % of one CPU core during a big burst),
+  and Mimi runs at low priority so your games and apps always come first.
 
-En cas de souci, les erreurs sont notées dans `%APPDATA%\Mimi\<profil>\erreurs.log`.
+### Pairing
 
-## Compiler
+```mermaid
+sequenceDiagram
+    participant A as PC 1 ("Create a code")
+    participant N as Local network
+    participant B as PC 2 ("Join")
+    A->>A: shows a 6-digit code and listens
+    B->>N: broadcast PAIR (fingerprint of the code)
+    N->>A: PAIR
+    A->>B: PAIROK + name
+    Note over A,B: both save the other's address.<br/>The code becomes the couple's shared secret.
+    B->>A: HEART ❤️
+```
 
-Prérequis : le SDK .NET (8 ou plus récent). Il cible .NET Framework 4.8 grâce aux assemblys de référence NuGet.
+If an address changes later (router restarted…), a PC that can't reach its partner broadcasts its `PING`
+on the local network and the partner answers, so they find each other again automatically.
+
+### Updates
+
+```mermaid
+flowchart LR
+    C["Check GitHub Releases API"] --> D{"Newer version with a<br/>*-win-x64.exe file?"}
+    D -- no --> Z["Nothing to do"]
+    D -- yes --> E["Download to %TEMP%"]
+    E --> F["Verify size + SHA-256<br/>+ valid executable"]
+    F --> R["Rename running Mimi.exe → Mimi.exe.old<br/>put the new one in place"]
+    R --> S["Restart the new version<br/>delete the old one"]
+```
+
+---
+
+## For developers
+
+**Build** (needs the [.NET SDK](https://dotnet.microsoft.com/download) 8 or newer; the app targets .NET Framework 4.8, built into Windows 10/11):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File build.ps1   # -> dist\Mimi.exe
 ```
 
-## Comment ça marche
+**Publish a release** (the updater picks the highest version tag that has a `*-win-x64.exe` file):
 
-| Fichier | Rôle |
+1. Bump `<Version>` in `Mimi.csproj`, build, then copy `dist\Mimi.exe` to `Mimi-X.Y.Z-win-x64.exe`.
+2. `git tag vX.Y.Z && git push --tags`
+3. `gh release create vX.Y.Z Mimi-X.Y.Z-win-x64.exe`
+
+**Project layout**
+
+| File | Role |
 |---|---|
-| `src/Overlay.cs` | Fenêtre transparente (*layered*, traversée par les clics), flux de cœurs : pop avec rebond, ondulation, inclinaison, squash & stretch, battement de cœur |
-| `src/Blitter.cs` | Rendu logiciel maison en virgule fixe + grille de zones modifiées (on n'efface et n'envoie que ce qui bouge) |
-| `src/Art.cs` | Cœurs dessinés en code (dégradé, reflets, halo), en plusieurs tailles pour rester nets |
-| `src/SoundBank.cs` | Sons synthétisés : *bloop* pentatonique, carillon « mi-mi », arpège du gros cœur |
-| `src/PeerLink.cs` | Réseau UDP pair-à-pair, appairage par broadcast, ping/présence, suivi d'adresse |
-| `src/Installer.cs` | Auto-installation, démarrage avec Windows, menu Démarrer, pare-feu, désinstallation |
-| `src/SettingsForm.cs` | Fenêtre de réglages |
+| `src/Program.cs` | Entry point, command-line options, single instance |
+| `src/MimiApp.cs` | Tray icon, hotkey, network, overlay, sounds and updates wired together |
+| `src/Overlay.cs` | Transparent click-through window, heart stream animation (easing, sway, squash & stretch) |
+| `src/Blitter.cs` | Fixed-point software renderer + dirty-tile tracking |
+| `src/Art.cs` | Hearts drawn in code (gradient, highlights, glow) at several sizes |
+| `src/SoundBank.cs` | Synthesized sounds (pentatonic "bloop", two-note chime, arpeggio) |
+| `src/PeerLink.cs` | Peer-to-peer UDP, pairing by broadcast, presence, address tracking |
+| `src/Updater.cs` | Self-update from GitHub Releases |
+| `src/Installer.cs` | Self-install, start with Windows, Start menu, firewall rule, uninstall |
+| `src/SettingsForm.cs` | Settings window |
+| `src/Lang.cs` | English / French translations |
 
-Protocole (UDP, port 47777) : `MIMI|1|<tag>|<TYPE>|<prénom>|<instance>`.
-`tag` est l'empreinte SHA-256 du code du couple : le code ne circule jamais en clair,
-et les paquets d'autres couples sont ignorés.
+**Wire protocol** (UDP, port 47777): `MIMI|1|<tag>|<TYPE>|<name>|<instance>`, where `tag` is a SHA-256 fingerprint of the pairing code.
+
+**Test on a single PC**
+
+```powershell
+.\Mimi.exe --portable --pair-host 123456      # profile "default", port 47777, Ctrl+Alt+H
+.\Mimi.exe --profile B --pair-join 123456     # profile "B", port 47778, Ctrl+Alt+J
+```
+
+Each profile keeps its own settings in `%APPDATA%\Mimi\<profile>`.
+Errors are logged to `%APPDATA%\Mimi\<profile>\errors.log`.
