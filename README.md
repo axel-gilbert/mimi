@@ -77,7 +77,7 @@ Right-click the heart icon, then **Uninstall…**, or use *Windows Settings → 
 ## How it works
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph A["💻 Your PC"]
         K["⌨️ Global shortcut<br/>Ctrl+Alt+H"] --> M1["Mimi.exe<br/>(tray app)"]
     end
