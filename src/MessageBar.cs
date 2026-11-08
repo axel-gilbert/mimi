@@ -329,7 +329,7 @@ namespace Mimi
         {
             ClearAttachment();
             gif = item;
-            try { gifPreview = Image.FromStream(new MemoryStream(item.Bytes)); if (ImageAnimator.CanAnimate(gifPreview)) ImageAnimator.Animate(gifPreview, (s, e) => { }); } catch { }
+            try { gifPreview = Image.FromStream(new MemoryStream(item.Bytes)); if (ImageAnimator.CanAnimate(gifPreview)) ImageAnimator.Animate(gifPreview, GifGrid.FrameHandler); } catch { }
             gifOpen = false;
             gifFrom = gifT;
             gifStartAt = clock.Elapsed.TotalSeconds;
@@ -348,7 +348,7 @@ namespace Mimi
         void ClearAttachment()
         {
             picture?.Dispose(); picture = null;
-            if (gifPreview != null) { try { ImageAnimator.StopAnimate(gifPreview, (s, e) => { }); } catch { } gifPreview.Dispose(); gifPreview = null; }
+            if (gifPreview != null) { try { ImageAnimator.StopAnimate(gifPreview, GifGrid.FrameHandler); } catch { } gifPreview.Dispose(); gifPreview = null; }
             gif = null;
         }
 
@@ -513,12 +513,26 @@ namespace Mimi
 
         internal void TestSetText(string text) { input.Text = text; input.SelectionStart = text.Length; Invalidate(); }
         internal void TestOpenGifs() { if (!gifOpen) ToggleGifs(); }
+        internal void TestCategory(string id) { suppressSearch = true; search.Text = ""; suppressSearch = false; LoadCategory(id); }
+        internal void TestSearch(string q) { search.Text = q; debounce.Stop(); LoadGifs(q); }
         internal void TestAttach(string path) => LoadFile(path);
         internal void TestDragOver(bool on) { dragOver = on; Invalidate(); }
 
         // ───────────── painting ─────────────
 
+        bool paintFailed;
+
         protected override void OnPaint(PaintEventArgs e)
+        {
+            // Never let an exception reach WinForms (it would draw a red cross instead of the bar).
+            try { PaintBar(e); }
+            catch (Exception ex)
+            {
+                if (!paintFailed) { paintFailed = true; Program.LogError(ex); }
+            }
+        }
+
+        void PaintBar(PaintEventArgs e)
         {
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -547,7 +561,7 @@ namespace Mimi
                     using (var bg = new SolidBrush(UiColors.PinkSoft)) g.FillPath(bg, path);
                     if (img != null)
                     {
-                        if (gifPreview != null) ImageAnimator.UpdateFrames(gifPreview);
+                        if (gifPreview != null) try { ImageAnimator.UpdateFrames(gifPreview); } catch { }
                         var st = g.Save();
                         g.SetClip(path);
                         GifGrid.DrawCover(g, img, t);

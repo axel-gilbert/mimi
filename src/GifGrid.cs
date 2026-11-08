@@ -31,6 +31,13 @@ namespace Mimi
 
         public event Action<Item> Picked;
 
+        /// <summary>
+        /// One shared handler: ImageAnimator identifies a registration by (image, handler), so StopAnimate must
+        /// get the very same handler, otherwise disposed images stay registered and the next frame update crashes.
+        /// </summary>
+        internal static readonly EventHandler FrameHandler = (s, e) => { };
+        bool paintFailed;
+
         public GifGrid()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
@@ -62,7 +69,7 @@ namespace Mimi
         public void Add(Item item)
         {
             if (placeholders > 0) placeholders--;
-            if (item.Image != null && ImageAnimator.CanAnimate(item.Image)) ImageAnimator.Animate(item.Image, (s, e) => { });
+            if (item.Image != null && ImageAnimator.CanAnimate(item.Image)) ImageAnimator.Animate(item.Image, FrameHandler);
             items.Add(item);
             if (selected < 0) selected = 0;
             tick.Start();
@@ -81,7 +88,7 @@ namespace Mimi
         {
             foreach (var it in items)
             {
-                if (it.Image != null) { try { ImageAnimator.StopAnimate(it.Image, (s, e) => { }); } catch { } it.Image.Dispose(); }
+                if (it.Image != null) { try { ImageAnimator.StopAnimate(it.Image, FrameHandler); } catch { } it.Image.Dispose(); it.Image = null; }
             }
             items.Clear();
             placeholders = 0;
@@ -198,6 +205,17 @@ namespace Mimi
 
         protected override void OnPaint(PaintEventArgs e)
         {
+            // Never let an exception reach WinForms: it would replace the control with a red cross for good.
+            try { PaintGrid(e); }
+            catch (Exception ex)
+            {
+                if (!paintFailed) { paintFailed = true; Program.LogError(ex); }
+                try { e.Graphics.Clear(BackColor); } catch { }
+            }
+        }
+
+        void PaintGrid(PaintEventArgs e)
+        {
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.InterpolationMode = InterpolationMode.Bilinear;
@@ -216,7 +234,6 @@ namespace Mimi
                 return;
             }
 
-            ImageAnimator.UpdateFrames();
             for (int i = 0; i < items.Count + placeholders; i++)
             {
                 var r = TileRect(i);
@@ -230,6 +247,7 @@ namespace Mimi
                     {
                         var state = g.Save();
                         g.SetClip(path);
+                        try { ImageAnimator.UpdateFrames(items[i].Image); } catch { }
                         DrawCover(g, items[i].Image, draw);
                         g.Restore(state);
                     }

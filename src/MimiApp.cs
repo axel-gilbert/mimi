@@ -577,6 +577,8 @@ namespace Mimi
                     if (arg.Length > 0) bar.TestSetText(arg);
                     break;
                 case "bar-gif": bar?.TestOpenGifs(); break;
+                case "bar-cat": bar?.TestCategory(arg); break;
+                case "bar-search": bar?.TestSearch(arg); break;
                 case "shownote": overlay.Note(PeerDisplayName, arg); break;
                 case "toast": overlay.Toast(arg); break;
                 case "bar-attach": bar?.TestAttach(arg); break;
